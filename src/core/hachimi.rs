@@ -100,7 +100,7 @@ impl Hachimi {
         let instance = match Self::new() {
             Ok(v) => v,
             Err(e) => {
-                super::log::init(false, false); // early init to log error
+                super::log::init(true, true); // early init to log error, force both flags on so init failure still writes log files
                 error!("Init failed: {}", e);
                 return false;
             }
@@ -673,9 +673,9 @@ impl CaptionConfig {
 
 #[derive(Deserialize, Serialize, Clone)]
 pub struct Config {
-    #[serde(default)]
+    #[serde(default = "Config::default_true")]
     pub debug_mode: bool,
-    #[serde(default)]
+    #[serde(default = "Config::default_true")]
     pub enable_file_logging: bool,
     #[serde(default)]
     pub apply_atlas_workaround: bool,
@@ -831,6 +831,7 @@ pub struct Config {
 }
 
 impl Config {
+    fn default_true() -> bool { true }
     fn default_open_browser_url() -> String { "https://www.google.com/".to_owned() }
     fn default_virtual_res_mult() -> f32 { 1.0 }
     fn default_ui_scale() -> f32 { 1.0 }
