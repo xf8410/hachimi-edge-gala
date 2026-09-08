@@ -149,6 +149,6 @@ jobs:
           body_path: CHANGELOG.md
           fail_on_unmatched_files: true
           files: |
-            artifacts/android/libmain-arm64-v8a.so
-            artifacts/android/sha256.json
+            artifacts/**/*.so
+            artifacts/**/*.json
           tag_name: ${{ env.RELEASE_VERSION }}
