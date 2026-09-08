@@ -15,8 +15,6 @@ jobs:
         include:
           - name: android
             target: aarch64-linux-android
-          - name: windows
-            target: x86_64-pc-windows-msvc
 
     name: Build (${{ matrix.name }})
     runs-on: ubuntu-latest
@@ -67,101 +65,6 @@ jobs:
             build/*.so
             build/sha256.json
 
-############### WINDOWS ##################
-
-      - name: Setup and Patch Dependencies (Windows)
-        if: matrix.target == 'x86_64-pc-windows-msvc'
-        run: |
-          pushd ..
-          git clone --revision 44cdd653e2317d300fb8a6c9c36b03f23991e803 https://github.com/emilk/egui.git
-          cd egui
-          sed -i 's/ui.set_min_width(ui.available_width());/\/\/ ui.set_min_width(ui.available_width());/' crates/egui/src/containers/combo_box.rs
-          cd ..
-          git clone --revision 903043939a076dc81e122a1c8451755bfb3979c8 https://github.com/Nekomaru-PKU/egui-directx11.git
-          popd
-
-          cat <<EOF >> Cargo.toml
-
-          egui-directx11 = { path = '../egui-directx11' }
-          egui = { path = '../egui/crates/egui' }
-          egui_extras = { path = '../egui/crates/egui_extras' }
-          EOF
-
-      - name: Setup Windows MSVC Cross-Compile Tools
-        if: matrix.target == 'x86_64-pc-windows-msvc'
-        run: |
-          sudo apt install -y llvm lld
-          sudo ln -sf /usr/bin/llvm-ar /usr/local/bin/llvm-lib
-
-      - name: Install cargo-xwin
-        if: matrix.target == 'x86_64-pc-windows-msvc'
-        uses: taiki-e/install-action@v2
-        with:
-          tool: cargo-xwin@0.23.1
-
-      - name: Cache cargo-xwin MSVC CRT & Windows SDK
-        if: matrix.target == 'x86_64-pc-windows-msvc'
-        uses: actions/cache@v6
-        with:
-          path: ~/.cache/cargo-xwin
-          key: ${{ runner.os }}-xwin-cache-v1
-
-      - name: Build Hachimi for Windows
-        if: matrix.target == 'x86_64-pc-windows-msvc'
-        run: |
-          mkdir -p build
-          cargo xwin build --target ${{ matrix.target }} --target-dir build --release
-          mv build/${{ matrix.target }}/release/hachimi.dll build/
-        env:
-          HACHIMI_IGNORE_DIRTY: "true"
-
-      - name: Build Cellar
-        if: matrix.target == 'x86_64-pc-windows-msvc'
-        run: |
-          git clone --depth 1 --revision d4c3f79801c8131e26df585766c35e5ce11ec57f https://github.com/Hachimi-Hachimi/Cellar
-          cd Cellar
-          cargo xwin build --target ${{ matrix.target }} --target-dir build --release
-          mv build/${{ matrix.target }}/release/cellar.dll build/
-          cd ..
-
-      - name: Check out FunnyHoney
-        if: matrix.target == 'x86_64-pc-windows-msvc'
-        run: git clone --depth 1 --revision 418b5348bd9b7376cc7485c591ca69d49aa4d805 https://gitlab.com/LeadRDRK/FunnyHoney.git
-
-      - name: Build Installer
-        if: matrix.target == 'x86_64-pc-windows-msvc'
-        run: |
-          git clone --depth 1 --revision 0387eb987aa9bc446415844e321125dff16e210f https://github.com/teiosteppa/Installer
-          cp build/hachimi.dll Installer/
-          mv Cellar/build/cellar.dll Installer/
-          mv FunnyHoney/FunnyHoney.exe Installer/
-          cd Installer
-          cargo xwin build --target ${{ matrix.target }} --target-dir build --release --features compress_bin
-          cd ..
-          mv Installer/build/${{ matrix.target }}/release/hachimi_installer.exe build/
-
-      - name: Get checksums for Windows binaries
-        if: matrix.target == 'x86_64-pc-windows-msvc'
-        run: |
-          cargo install b3sum --locked --version 1.8.6
-          DLL_HASH=$(b3sum --no-names build/hachimi.dll)
-          EXE_HASH=$(b3sum --no-names build/hachimi_installer.exe)
-          cat <<EOF > build/blake3.json
-          {
-            "hachimi.dll": "$DLL_HASH",
-            "hachimi_installer.exe": "$EXE_HASH"
-          }
-          EOF
-
-      - name: Attest Windows
-        if: matrix.target == 'x86_64-pc-windows-msvc'
-        uses: actions/attest@v4
-        with:
-          subject-path: |
-            build/blake3.json
-            build/hachimi.dll
-            build/hachimi_installer.exe
-
 ############### ARTIFACTS ##################
 
       - name: Upload Android binaries
@@ -172,16 +75,6 @@ jobs:
           path: |
             build/*.so
             build/sha256.json
-
-      - name: Upload Windows binaries
-        if: matrix.target == 'x86_64-pc-windows-msvc'
-        uses: actions/upload-artifact@v7
-        with:
-          name: windows
-          path: |
-            build/blake3.json
-            build/hachimi.dll
-            build/hachimi_installer.exe
 
   create-release:
     needs: build
@@ -253,5 +146,4 @@ jobs:
           body_path: CHANGELOG.md
           files: |
             artifacts/android/*
-            artifacts/windows/*
           tag_name: ${{ env.RELEASE_VERSION }}
