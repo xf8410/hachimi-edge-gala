@@ -1,3 +1,59 @@
+<div align="center">
+
+# 🛠️ hachimi-edge-gala
+
+**把 Hachimi-Edge 的资源注入能力移植到 BestSoccer（galasports）**
+
+![仓库](https://img.shields.io/badge/仓库-xf8410-8B5CF6?style=flat-square) ![分支](https://img.shields.io/badge/分支-2-10B981?style=flat-square) ![版本](https://img.shields.io/badge/版本-2-F59E0B?style=flat-square) ![CI](https://img.shields.io/badge/CI-3-3B82F6?style=flat-square)
+
+</div>
+
+---
+> 📌 **一句话定位**：把 Hachimi-Edge 的资源注入能力移植到 BestSoccer（galasports）
+
+## 🧭 项目定位
+
+本项目是 <b>Hachimi-Edge</b> 的分支改造版：保留原框架「游戏启动时注入自定义资源与补丁」的核心机制，把目标应用从赛马娘切换为 BestSoccer（com.galasports.legendaryfootball.cn），实现足球游戏的界面与资源定制。
+
+## ✨ 核心功能
+- 游戏启动期注入自定义资源与补丁，无需修改 APK 本体- Rust 实现，与上游 Hachimi-Edge 保持同构，方便跟随上游演进- 按包名 galasports 适配资源路径与目标应用检测
+
+## 🌿 分支导览（共 2 个分支全览）
+
+<details open>
+<summary><b>点击收起/展开全部分支用途说明</b></summary>
+
+| 分支 | 用途说明 |
+|---|---|
+| `main` | 主干：BestSoccer 适配的改造代码 |
+| `auto-security-fix` | 自动安全修复分支（机器人维护） |
+
+</details>
+
+## 🏷️ 版本历史
+
+现有 v0.29.0 / v0.29.1 两个版本，跟随上游 Hachimi-Edge 版本号，通过 Create Release 流水线产出。
+
+完整版本列表 ➡️ [Releases 页](../../releases)
+
+## ⚙️ CI 流水线（共 3 条）
+
+| 流水线 | 用途说明 |
+|---|---|
+| Daily Cargo Audit | 每日依赖安全审计（cargo audit） |
+| Clippy Check | Rust 代码静态检查 |
+| Create Release | 发布构建，产出安装包到 Releases |
+
+
+---
+
+## 📜 历史介绍存档
+
+> 以下为仓库原有介绍，**内容未删改**，仅移入存档区（新版介绍以本页上方为准）。
+
+<details>
+<summary><b>点击展开原 README</b></summary>
+
 <img align="left" width="80" height="80" src="assets/icon.png">
 
 # Hachimi Edge
@@ -56,3 +112,6 @@ These projects have been the basis for Hachimi's development; without them, Hach
 
 # License
 [GNU GPLv3](LICENSE)
+
+
+</details>
