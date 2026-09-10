@@ -7,6 +7,13 @@ pub fn init(filter_level: log::LevelFilter, file_logging: bool) {
         let mut path = super::utils::get_game_dir();
         path.push("hachimi.log");
 
+        // First run has no hachimi dir yet; File::create alone silently fails.
+        if let Some(parent) = path.parent() {
+            if let Err(e) = std::fs::create_dir_all(parent) {
+                eprintln!("Failed to create log dir {}: {}", parent.display(), e);
+            }
+        }
+
         if let Ok(file) = File::create(path) {
             let config = ConfigBuilder::new()
                 .set_target_level(LevelFilter::Error)
