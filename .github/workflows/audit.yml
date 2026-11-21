@@ -1,0 +1,24 @@
+name: Daily Cargo Audit
+
+permissions:
+  contents: read
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  cargo_audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: swatinem/rust-cache@v2
+
+      - name: Install cargo-audit
+        run: cargo install cargo-audit
+
+      - name: Audit (report only, never opens a pull request)
+        run: |
+          cargo audit || echo "::warning::审计发现漏洞：结果只写在这里，不自动开 PR、不改依赖"
